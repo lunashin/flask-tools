@@ -1,14 +1,26 @@
 <html>
 
 <head>
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+    <style>
+        button {
+            width:100px;
+            height:50px;
+        }
+    </style>
+
 </head>
 
 <body>
+    <script>
+        new ClipboardJS('.btn');
+    </script>
 
     <!-- Base64 Encode -->
     <label for="base64encode_from">base64 Encode text:</label><br>
     <textarea id="base64encode_from" name="base64encode_from" placeholder="Input plain text" rows="10" cols="50"></textarea>
     <textarea id="base64encode_result" placeholder="result" rows="10" cols="50"></textarea>
+    <button class="btn" data-clipboard-target="#base64encode_result">Copy</button><br>
 
     <br>
     <br>
@@ -17,6 +29,7 @@
     <label for="base64decode_from">base64 Decode text:</label><br>
     <textarea id="base64decode_from" name="base64decode_from" placeholder="Input plain text" rows="10" cols="50"></textarea>
     <textarea id="base64decode_result" placeholder="result" rows="10" cols="50"></textarea>
+    <button class="btn" data-clipboard-target="#base64decode_result">Copy</button><br>
 
 
 
