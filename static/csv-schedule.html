@@ -1,0 +1,40 @@
+<html>
+
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+    <style>
+        button {
+            width:100px;
+            height:50px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <script>
+        new ClipboardJS('.btn');
+    </script>
+
+
+    <label for="column-name">タスク名の列番号</label>
+    <input type="number" id="column-task" value="1" required >
+    <br>
+    <label for="column-days">工数の列番号</label>
+    <input type="number" id="column-days" value="2" required >
+    <br>
+    <label for="column-role">担当者の列番号</label>
+    <input type="number" id="column-role" value="" required >
+    <br>
+    <br>
+
+    <label for="csv-input">Schedule CSV Text:</label><br>
+    <textarea id="csv-input" name="csv-input" placeholder="Input CSV" rows="20" cols="50"></textarea>
+    <textarea id="csv-result" name="csv-result" placeholder="result" rows="20" cols="50"></textarea>
+    <button class="btn" data-clipboard-target="#csv-input">Copy</button><br>
+ 
+
+    <script src="/static/csv-schedule.js"></script>
+</body>
+
+</html>

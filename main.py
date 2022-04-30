@@ -96,23 +96,17 @@ def ep_base64_tool():
 
 
 
-# csv test
-#
-# content-type : application/json
-# body {"data":"[Base64 encoded CSV]"}
-@app.route("/csv", methods=["POST"])
-@content_type('application/json')
-def ep_csv():
-    print(request.json['data'])
-    csv_b64 = request.json['data']
 
-    # BASE64デコード
-    decode_csv = base64.b64decode(csv_b64).decode()
-    print(decode_csv)
 
+
+# CSVの工数列と開始日時からスケジュールCSVを作成
+# 
+# 引数:
+#   1. CSVテキスト
+def make_schedule(csv_text):
     # 文字列をストリームへ書き込み
     f = io.StringIO()
-    f.write(decode_csv)
+    f.write(csv_text)
     f.seek(0)
 
     # CSVとしてパース
@@ -123,8 +117,33 @@ def ep_csv():
 
     f.close()
 
-    # make result
-    result_data = ""
+    ret = ""
+    return ""
+
+
+
+# csv test
+#
+# content-type : application/json
+# body {"data":"[Base64 encoded CSV]"}
+@app.route("/csv", methods=["POST"])
+@content_type('application/json')
+def ep_csv():
+    raw_csv = request.json['data']
+    column_task = request.json['column_task']
+    column_days = request.json['column_days']
+    column_role = request.json['column_role']
+
+    print(column_task)
+    print(column_days)
+    print(column_role)
+
+    # BASE64デコード
+    # raw_csv = base64.b64decode(csv_b64).decode()
+    # print(raw_csv)
+
+    # スケジュールCSV作成
+    result_data = make_schedule(raw_csv)
 
     # make response
     j = json.loads('{"result":""}')
