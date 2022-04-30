@@ -3,6 +3,8 @@
 function init()
 {
     // change イベントハンドラ登録
+
+    // Base64エンコード
     elem = document.getElementById("base64encode_from");
     elem.addEventListener('change', (event) => {
         // alert(event.target.value);
@@ -15,6 +17,7 @@ function init()
         });
     });
 
+    // Base64デコード
     elem = document.getElementById("base64decode_from");
     elem.addEventListener('change', (event) => {
         // alert(event.target.value);
@@ -24,7 +27,10 @@ function init()
         .then(data => {
             elem = document.getElementById("base64decode_result");
             elem.value = data.result;
-        });
+
+            elem = document.getElementById("base64decode_json");
+            elem.value = data.json_formated;
+          });
     });
 
 }

@@ -70,9 +70,17 @@ def ep_base64decode():
         print("Error. base64.b64decode()")
         print(e)
 
+    # JSON Format
+    try:
+        j_decode = json.loads(decode)
+        j_indent = json.dumps(j_decode, indent=2)
+    except Exception as e:
+        j_indent = ""
+
     # make response
     j = json.loads('{"result":""}')
     j["result"] = decode
+    j["json_formated"] = j_indent
 
     # response
     return j
