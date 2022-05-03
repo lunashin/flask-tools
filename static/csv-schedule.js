@@ -26,9 +26,10 @@ function init()
         if (column_role != '') {
           column_role_num = Number(column_role)
         }
+        let start_date = document.getElementById("start-date").value;
 
         // POST
-        postData("/csv",  { data: event.target.value, column_task: column_task_num, column_days: column_days_num, column_role: column_role_num })
+        postData("/csv",  { data: event.target.value, index_name: column_task_num, index_days: column_days_num, index_role: column_role_num, start_date: start_date })
         .then(data => {
             elem = document.getElementById("csv-result");
             elem.value = data.result;

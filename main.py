@@ -8,6 +8,7 @@ import io
 import base64
 import binascii
 import schedule_manager
+import datetime
 
 app = Flask(__name__)
 
@@ -110,14 +111,19 @@ def make_schedule(csv_text, index_name, index_days, index_role, start_date):
     mng.setIndexName(index_name)
     mng.setIndexDays(index_days)
     mng.setIndexRole(index_role)
-    mng.setStartDate(start_date)
 
     # CSVから読み取り
     mng.read_csv_from_stream(f, ',')
-    mng.show()
-
-    # ストリーム閉じる
     f.close()
+
+    # スケジュールを計算
+    mng.detect_start_end(start_date)
+
+    result = mng.get_csv_text(',')
+    print("resut--------------")
+    print(result)
+
+    return result
 
 
 
@@ -133,17 +139,14 @@ def ep_csv():
     index_name = request.json['index_name']
     index_days = request.json['index_days']
     index_role = request.json['index_role']
-    start_date = request.json["start_date"]
-
-    # BASE64デコード
-    # decode_csv = base64.b64decode(csv_b64).decode()
-    # print(decode_csv)
+    start_date_str = request.json["start_date"]
+    start_date = datetime.datetime.strptime(start_date_str, '%Y%m%d')
 
     # スケジュール作成
-    make_schedule(csv_text, index_name, index_days, index_role, start_date)
+    result = make_schedule(csv_text, index_name, index_days, index_role, start_date)
 
     # make result
-    result_data = ""
+    result_data = result
 
     # make response
     j = json.loads('{"result":""}')

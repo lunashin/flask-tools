@@ -4,6 +4,7 @@ import csv
 import datetime
 import sys
 import os
+import io
 
 
 
@@ -47,7 +48,6 @@ class schedule_manager:
     index_name = -1
     index_days = -1
     index_role = -1
-    startDateStr = ""
 
     def __init__(self):
         self.list = []
@@ -55,7 +55,6 @@ class schedule_manager:
         self.index_name = -1
         self.index_days = -1
         self.index_role = -1
-        self.startDateStr = ""
 
     # CSVフィールドインデックス設定 (0 〜)
     def setIndexName(self, index):
@@ -64,8 +63,6 @@ class schedule_manager:
         self.index_days = index
     def setIndexRole(self, index):
         self.index_role = index
-    def setStartDate(self, startDateStr):
-        self.startDateStr= startDateStr
 
     # ストリームからCSV読み取り
     def read_csv_from_stream(self, st, delimiter):
@@ -151,27 +148,43 @@ class schedule_manager:
         for item in self.list:
             print(item.name + "/" + str(item.days) + "/" + item.start_date.strftime('%Y-%m-%d') + "/" + item.end_date.strftime('%Y-%m-%d'))
 
-    # CSVへ出力
-    def write_csv(self, outfile, delimiter):
+    # CSV内容を取得
+    def get_csv_text(self, delimiter):
+        f = io.StringIO()
+        self.write_to_stream(f, delimiter)
+        ret = f.getvalue()
+        f.close()
+        return ret
+
+    # CSVファイルへ出力
+    def write_to_csvfile(self, outfile, delimiter):
         # write csv
         with open(outfile, mode='w') as f:
-            # ヘッダ
-            f.write("No" + delimiter + "Name"  + delimiter + "days" + delimiter + "role" + delimiter + "date" + "\n")
-            # 本体
-            number = 1
-            for item in self.list:
-                f.write(str(number))
-                f.write(delimiter)
-                f.write(item.name)
-                f.write(delimiter)
-                f.write(str(item.days))
-                f.write(delimiter)
-                f.write(item.role)
-                f.write(delimiter)
-                f.write(item.start_date.strftime('%Y/%m/%d') + " → " + item.end_date.strftime('%Y/%m/%d'))
-                f.write(delimiter)
-                f.write("\n")
-                number = number + 1
+            self.write_to_stream(f, delimiter)
+
+    # ストリームへ出力
+    def write_to_stream(self, st, delimiter):
+        # ヘッダ
+        st.write("No" + delimiter + "Name"  + delimiter + "days" + delimiter + "role" + delimiter + "date" + "\n")
+        # 本体
+        number = 1
+        for item in self.list:
+            # No
+            st.write(str(number))
+            st.write(delimiter)
+            # Name
+            st.write(item.name)
+            st.write(delimiter)
+            # Days
+            st.write(str(item.days))
+            st.write(delimiter)
+            # Role
+            st.write(item.role)
+            st.write(delimiter)
+            # 開始日 → 終了日
+            st.write(item.start_date.strftime('%Y/%m/%d') + " → " + item.end_date.strftime('%Y/%m/%d'))
+            st.write("\n")
+            number = number + 1
 
 
 
