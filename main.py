@@ -7,6 +7,7 @@ import csv
 import io
 import base64
 import binascii
+import schedule_manager
 
 app = Flask(__name__)
 
@@ -96,54 +97,53 @@ def ep_base64_tool():
 
 
 
-
-
-
-# CSVの工数列と開始日時からスケジュールCSVを作成
-# 
-# 引数:
-#   1. CSVテキスト
-def make_schedule(csv_text):
+# CSVテキストからスケジュールを作成
+def make_schedule(csv_text, index_name, index_days, index_role, start_date):
     # 文字列をストリームへ書き込み
     f = io.StringIO()
     f.write(csv_text)
     f.seek(0)
 
-    # CSVとしてパース
-    csv_reader = csv.reader(f)
-    for row in csv_reader:
-        # TODO: CSVに対する任意の処理
-        print(row)
+    mng = schedule_manager.schedule_manager()
 
+    # インデックス位置設定
+    mng.setIndexName(index_name)
+    mng.setIndexDays(index_days)
+    mng.setIndexRole(index_role)
+    mng.setStartDate(start_date)
+
+    # CSVから読み取り
+    mng.read_csv_from_stream(f, ',')
+    mng.show()
+
+    # ストリーム閉じる
     f.close()
 
-    ret = ""
-    return ""
 
 
-
-# csv test
+# Make Schedule CSV
 #
 # content-type : application/json
-# body {"data":"[Base64 encoded CSV]"}
+# body { "data":"[CSV text], "index_name": x, "index_days": x, "index_role": x, "start_date": "yyyymmdd" }
 @app.route("/csv", methods=["POST"])
 @content_type('application/json')
 def ep_csv():
-    raw_csv = request.json['data']
-    column_task = request.json['column_task']
-    column_days = request.json['column_days']
-    column_role = request.json['column_role']
-
-    print(column_task)
-    print(column_days)
-    print(column_role)
+    # print(request.json['data'])
+    csv_text = request.json['data']
+    index_name = request.json['index_name']
+    index_days = request.json['index_days']
+    index_role = request.json['index_role']
+    start_date = request.json["start_date"]
 
     # BASE64デコード
-    # raw_csv = base64.b64decode(csv_b64).decode()
-    # print(raw_csv)
+    # decode_csv = base64.b64decode(csv_b64).decode()
+    # print(decode_csv)
 
-    # スケジュールCSV作成
-    result_data = make_schedule(raw_csv)
+    # スケジュール作成
+    make_schedule(csv_text, index_name, index_days, index_role, start_date)
+
+    # make result
+    result_data = ""
 
     # make response
     j = json.loads('{"result":""}')
