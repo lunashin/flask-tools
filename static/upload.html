@@ -1,0 +1,67 @@
+<html>
+
+<head>
+    <style>
+        button {
+            width:100px;
+            height:50px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <!-- Browse -->
+    <form method="post" action="/upload" enctype="multipart/form-data">
+        <input type="file" name="files">
+        <button type="submit">送信する</button>
+    </form>
+
+    <br>
+    <br>
+
+    <!-- Drop -->
+    <form action="/upload" method="post" enctype="multipart/form-data">
+        <div id="drop-zone" style="border: 1px solid; padding: 30px;">
+            <p>ファイルをドラッグ＆ドロップもしくは</p>
+            <input type="file" name="files" id="file-input">
+        </div>
+        <input type="submit" style="margin-top: 50px">
+    </form>
+
+
+
+    <script type="text/javascript">
+        var dropZone = document.getElementById('drop-zone');
+        var fileInput = document.getElementById('file-input');
+
+        // ドラッグ
+        dropZone.addEventListener('dragover', function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            this.style.background = '#e1e7f0';
+        }, false);
+
+        // ドラッグ解除
+        dropZone.addEventListener('dragleave', function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            this.style.background = '#ffffff';
+        }, false);
+
+        // ドロップ
+        dropZone.addEventListener('drop', function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            this.style.background = '#ffffff'; //背景色を白に戻す
+            var files = e.dataTransfer.files; //ドロップしたファイルを取得
+            if (files.length > 1) return alert('アップロードできるファイルは1つだけです。');
+            fileInput.files = files; //inputのvalueをドラッグしたファイルに置き換える。
+        }, false);
+    </script>
+
+
+
+</body>
+
+</html>

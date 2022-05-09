@@ -1,6 +1,7 @@
 #!python
 
-from flask import Flask, render_template, make_response, jsonify, request
+from flask import Flask, render_template, make_response, jsonify, request, redirect
+from werkzeug.utils import secure_filename
 import functools
 import json
 import csv
@@ -9,6 +10,8 @@ import base64
 import binascii
 import schedule_manager
 import datetime
+import os
+
 
 app = Flask(__name__)
 
@@ -154,6 +157,87 @@ def ep_csv():
 
     # response
     return j
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 画像のアップロード先のディレクトリ
+UPLOAD_FOLDER = './uploads'
+# アップロードされる拡張子の制限
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'gif', 'csv'])
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+redirect_url = "/static/upload.html"
+
+
+
+# ファイル名チェック
+# return: True / False
+def allwed_file(filename):
+    # .があるかどうかのチェックと、拡張子の確認
+    # OKなら１、だめなら0
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# ファイル名等チェック・保存
+# 
+def check_and_store_file(request, form_key):
+    # ファイルがなかった場合の処理
+    if form_key not in request.files:
+        print('ファイルがありません')
+        return ''
+
+    # データの取り出し
+    file = request.files[form_key]
+    print("filename: ", file)
+
+    # ファイル名がなかった時の処理
+    if file.filename == '':
+        print('ファイルがありません')
+        return ''
+
+    # ファイルのチェック
+    if file and allwed_file(file.filename):
+        # 危険な文字を削除（サニタイズ処理）
+        filename = secure_filename(file.filename)
+        # ファイルの保存
+        dest = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(dest)
+        print("保存先: ", dest)
+        return dest
+    else:
+        print('許可されていないファイル')
+
+    return ''
+
+
+
+# Upload files TEST
+#
+@app.route("/upload", methods=["POST"])
+def ep_upload():
+    form_key = "files"
+
+    if request.method == 'POST':
+        # ファイル名等チェック・保存
+        file_dest = check_and_store_file(request, form_key)
+        if file_dest != '':
+            print(file_dest)
+            print("success")
+
+    redirect(redirect_url)
+    return ''
+
+
 
 
 
