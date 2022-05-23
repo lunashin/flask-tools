@@ -11,6 +11,7 @@ import binascii
 import schedule_manager
 import datetime
 import os
+from aws import ec2
 
 
 app = Flask(__name__)
@@ -237,6 +238,40 @@ def ep_upload():
     redirect(redirect_url)
     return ''
 
+
+
+
+
+##################################################
+# AWS
+##################################################
+
+# AWS
+#
+@app.route("/aws", methods=["GET"])
+def ep_aws():
+    ec2_obj = ec2.ec2()
+    res = ec2_obj.get_all()
+    return render_template('ec2_list.html', ec2_list=res)
+
+
+# AWS START TEST
+#
+@app.route("/aws/start", methods=["GET"])
+def ep_aws_start():
+    if request.args.get('instance_id') is not None:
+        ec2_obj = ec2.ec2_low()
+        ec2_obj.start(request.args.get('instance_id'))
+    return "ok"
+
+# AWS STOP TEST
+#
+@app.route("/aws/stop", methods=["GET"])
+def ep_aws_stop():
+    if request.args.get('instance_id') is not None:
+        ec2_obj = ec2.ec2_low()
+        ec2_obj.stop(request.args.get('instance_id'))
+    return "ok"
 
 
 

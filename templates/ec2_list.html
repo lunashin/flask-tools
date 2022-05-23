@@ -1,0 +1,69 @@
+<html>
+
+<head>
+</head>
+
+<body>
+
+<h1>EC2</h1>
+
+
+<table border=1>
+    <tr>
+        <th>インスタンス名</th>
+        <th>ステータス</th>
+        <th>Private IP</th>
+        <th>Public IP</th>
+        <th>起動/停止</th>
+    </tr>
+    {% for item in ec2_list %}
+    <tr>
+        <td>{{ item.name }}</td>
+        <td>{{ item.state }}</td>
+        <td>{{ item.private_ip }}</td>
+        <td>{{ item.public_ip }}</td>
+        <td> <input type="button" onclick="ec2_action('{{ item.instance_id }}', '{{item.state}}')" value="{% if item.state == 'stopped' %} Start {% else %} Stop {% endif %}"> </td>
+    </tr>
+    {% endfor %}
+</table>
+
+
+
+
+<script>
+    // Send EC2 Start
+    function ec2_start(instance_id)
+    {
+        // fetch("/aws/start?instance_id=" + instance_id);
+    }
+
+    // Send EC2 Stop
+    function ec2_stop(instance_id)
+    {
+        // fetch("/aws/stop?instance_id=" + instance_id);
+    }
+
+    // EC2 Start/Stop Action
+    function ec2_action(instance_id, state){
+        if (state == 'stopped')
+        {
+            // start
+            ec2_start(instance_id);
+        }
+        else
+        {
+            // stop
+            ec2_stop(instance_id);
+        }
+
+        // ボタン非表示
+        this.value = "hoge";
+        // this.parentNode.style.display = "none";
+    }
+</script>
+
+
+
+</body>
+
+</html>

@@ -31,9 +31,9 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# flask インストール
-echo "- Install flask..."
-pip3 install flask
+# パッケージインストール
+echo "- Install packages..."
+pip3 install -r requirements.txt
 if [ $? -ne 0 ]; then
     echo "faled."
     exit 1
