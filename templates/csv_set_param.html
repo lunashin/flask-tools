@@ -1,0 +1,69 @@
+<html>
+
+<head>
+    <title>CSV Schedule maker</title>
+
+    <style>
+      .btn_submit {
+          width:100px;
+          height:50px;
+      }
+    </style>
+
+</head>
+
+<body>
+
+<h1>CSVスケジュール作成ツール</h1>
+
+
+<!-- form -->
+<form action="/set_param_csv" method="get" >
+    <!-- タスク名 -->
+    <div>
+      <label for="name">タスク名列: </label>
+      <input type="number" name="index_name" id="name" value={{index_name}} required>
+    </div>
+
+    <!-- 工数(日) -->
+    <div>
+        <label for="days">工数(日)列: </label>
+        <input type="number" name="index_days" id="days" value={{index_days}} required>
+    </div>
+
+    <!-- 作業者 -->
+    <div>
+        <label for="role">作業者列: </label>
+        <input type="number" name="index_role" value={{index_role}} id="role">
+    </div>
+
+    <!-- 開始日 -->
+    <div>
+        <label for="start_date">開始日: </label>
+        <input type="text" name="start_date" id="start_date" value={{start_date}} required>
+    </div>
+
+    <!-- 送信ボタン -->
+    <div>
+      <input type="submit" style="margin-top: 10px" value="Send" class="btn_submit">
+    </div>
+  </form>
+
+
+    <br>
+
+
+    <h2>フィールド一覧</h2>
+
+    {% for item in csv_field_list %}
+        <p> {{ loop.index - 1 }} {{ item }} </p>
+    {% endfor %}
+
+
+
+
+
+
+</body>
+
+</html>

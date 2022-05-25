@@ -66,15 +66,10 @@ def ep_base64decode():
     print(request.json['data'])
 
     # decode base64
-    decode = "Error."
-    try:
-        decode = base64.b64decode(request.json['data']).decode()
-    except UnicodeDecodeError as e:
-        print("Error. base64.b64decode()")
-        print(e)
-    except binascii.Error as e:
-        print("Error. base64.b64decode()")
-        print(e)
+    # decode = base64decode(request.json['data']).decode()
+    decode = base64decode(request.json['data'])
+    if decode == '':
+        decode = 'Error.'
 
     # JSON Format
     try:
@@ -101,14 +96,62 @@ def ep_base64_tool():
 
 
 
+# Base64デコード
+def base64decode(str):
+    decode_str = ""
+    try:
+        decode_str = base64.b64decode(str)
+    except Exception:
+        try:
+            decode_str = base64.b64decode(str + "=")
+        except Exception:
+            try:
+                decode_str = base64.b64decode(str + "==")
+            except Exception as e:
+                print("base64 decodee error.")
+                print(e)
+                return ""
+    return decode_str.decode('utf8')
 
-# CSVテキストからスケジュールを作成
-def make_schedule(csv_text, index_name, index_days, index_role, start_date):
+
+
+
+
+
+
+
+
+
+#################################################### 
+# CSV スケジュール作成
+#################################################### 
+
+app.config['CSV_FILE'] = ''
+app.config['CSV_DELIMITER'] = '\t'
+
+
+
+# CSVテキストからスケジュールを作成(ファイル版)
+def make_schedule_from_file(csv_file, index_name, index_days, index_role, start_date_str):
+    ret = ""
+    with open(csv_file) as f:
+        ret = make_schedule_from_stream(f, index_name, index_days, index_role, start_date_str)
+    return ret
+
+
+# CSVテキストからスケジュールを作成(テキスト版)
+def make_schedule_from_string(csv_text, index_name, index_days, index_role, start_date_str):
     # 文字列をストリームへ書き込み
     f = io.StringIO()
     f.write(csv_text)
     f.seek(0)
+    ret = make_schedule_from_stream(f, index_name, index_days, index_role, start_date_str)
+    f.close()
+    return ret
 
+
+# CSVテキストからスケジュールを作成(ストリーム版)
+def make_schedule_from_stream(f, index_name, index_days, index_role, start_date_str):
     mng = schedule_manager.schedule_manager()
 
     # インデックス位置設定
@@ -117,17 +160,57 @@ def make_schedule(csv_text, index_name, index_days, index_role, start_date):
     mng.setIndexRole(index_role)
 
     # CSVから読み取り
-    mng.read_csv_from_stream(f, ',')
+    mng.read_csv_from_stream(f, app.config['CSV_DELIMITER'])
     f.close()
 
     # スケジュールを計算
+    start_date = datetime.datetime.strptime(start_date_str, '%Y%m%d')
     mng.detect_start_end(start_date)
 
-    result = mng.get_csv_text(',')
+    result = mng.get_csv_text(app.config['CSV_DELIMITER'])
     print("resut--------------")
     print(result)
 
     return result
+
+
+# CSVファイルから先頭行のフィールドをリストで取得
+def get_field_list(csvfile):
+    # 1行目を取得
+    field_list = list()
+    with open(csvfile) as f:
+        reader = csv.reader(f, delimiter=app.config['CSV_DELIMITER'])
+        index = 0
+        for row in reader:
+            for field in row:
+                field_list.append(field)
+            break
+    
+    return field_list
+
+
+# 
+def get_field_index(csvfile, keyword, default_index):
+    index_ret = -1
+
+    # 1行目を取得
+    field_list = list()
+    with open(csvfile) as f:
+        reader = csv.reader(f, delimiter=app.config['CSV_DELIMITER'])
+        index = 0
+        for row in reader:
+            for field in row:
+                if keyword in field:
+                    index_ret = index
+                index += 1
+            break
+    
+    # 該当なしの場合はデフォルト値
+    if index_ret == -1:
+        index_ret = default_index
+    
+    return index_ret
+
 
 
 
@@ -147,7 +230,7 @@ def ep_csv():
     start_date = datetime.datetime.strptime(start_date_str, '%Y%m%d')
 
     # スケジュール作成
-    result = make_schedule(csv_text, index_name, index_days, index_role, start_date)
+    result = make_schedule_from_string(csv_text, index_name, index_days, index_role, start_date)
 
     # make result
     result_data = result
@@ -159,6 +242,89 @@ def ep_csv():
     # response
     return j
 
+
+
+
+
+
+
+
+#################################################### 
+# CSV スケジュール作成 (CSVファイルアップロード版)
+#################################################### 
+
+# Upload CSV
+#
+@app.route("/upload_csv", methods=["POST"])
+def ep_csv_upload():
+    form_key = "files"
+
+    # ファイル名等チェック・保存
+    file_dest = check_and_store_file(request, form_key)
+    if file_dest == '':
+        print("redirect")
+        return redirect("/static/csv-upload.html")
+
+    app.config['CSV_FILE'] = file_dest
+
+    # デリミタ決定
+    with open(file_dest) as f:
+        s_line = f.readline()
+        if '\t' in s_line:
+            app.config['CSV_DELIMITER'] = '\t'
+        else:
+            app.config['CSV_DELIMITER'] = ','
+
+    # CSVフィールド一覧取得
+    field_list = get_field_list(file_dest)
+    print(field_list)
+
+    # インデックス取得
+    index_name = get_field_index(file_dest, 'タスク', 0)
+    index_days = get_field_index(file_dest, '工数', 1)
+    index_role = get_field_index(file_dest, '担当', -1)
+    if index_role == -1:
+        index_role_str = ""
+    else:
+        index_role_str = str(index_role)
+    
+    dt_now_str = datetime.datetime.now().strftime('%Y%m%d')
+    return render_template('csv_set_param.html', csv_field_list=field_list, index_name=str(index_name), index_days=str(index_days), index_role=index_role_str, start_date=dt_now_str)
+
+
+
+# Set param CSV
+#
+@app.route("/set_param_csv", methods=["GET"])
+def ep_csv_set_param():
+    index_name_str = request.args.get('index_name')
+    index_days_str = request.args.get('index_days')
+    index_role_str = request.args.get('index_role')
+    start_date_str = request.args.get('start_date')
+    print(index_name_str,index_days_str,index_role_str,start_date_str)
+
+    # クエリチェック
+    if index_name_str is None or index_name_str == '':
+        field_list = get_field_list(app.config['CSV_FILE'])
+        return render_template('csv_set_param.html', csv_field_list=field_list, index_name=index_name_str, index_days=index_days_str, index_role=index_role_str, start_date=start_date_str)
+    if index_days_str is None or index_days_str == '':
+        field_list = get_field_list(app.config['CSV_FILE'])
+        return render_template('csv_set_param.html', csv_field_list=field_list, index_name=index_name_str, index_days=index_days_str, index_role=index_role_str, start_date=start_date_str)
+    if start_date_str is None or start_date_str == '':
+        field_list = get_field_list(app.config['CSV_FILE'])
+        return render_template('csv_set_param.html', csv_field_list=field_list, index_name=index_name_str, index_days=index_days_str, index_role=index_role_str, start_date=start_date_str)
+
+    if index_role_str is None or index_role_str == '':
+        index_role_str = "-1"
+
+    index_name = int(index_name_str)
+    index_days = int(index_days_str)
+    index_role = int(index_role_str)
+
+    # スケジュールCSV作成
+    ret_csv = make_schedule_from_file(app.config['CSV_FILE'], index_name, index_days, index_role, start_date_str)
+
+    return render_template('csv_result.html', csv_text=ret_csv)
 
 
 
@@ -203,7 +369,7 @@ def check_and_store_file(request, form_key):
 
     # ファイル名がなかった時の処理
     if file.filename == '':
-        print('ファイルがありません')
+        print('ファイルがありません2')
         return ''
 
     # ファイルのチェック
@@ -283,4 +449,5 @@ def ep_aws_stop():
 
 ## magic
 if __name__ == "__main__":
-    app.run(debug=True, host='127.0.0.1', port=5555)
+    # app.run(debug=True, host='127.0.0.1', port=5555)
+    app.run(debug=True)
