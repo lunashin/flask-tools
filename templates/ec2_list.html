@@ -1,13 +1,19 @@
 <html>
 
 <head>
+
+    <style type="text/css">
+        .running{ color: #40bd19; font-weight:bolder; }
+        .stopped{ color: #bebebe; }
+    </style>
+
 </head>
 
 <body>
 
 <h1>EC2</h1>
 
-
+<h2>Running</h2>
 <table border=1>
     <tr>
         <th>インスタンス名</th>
@@ -16,16 +22,37 @@
         <th>Public IP</th>
         <th>起動/停止</th>
     </tr>
-    {% for item in ec2_list %}
+    {% for item in running_list %}
     <tr>
         <td>{{ item.name }}</td>
-        <td>{{ item.state }}</td>
+        <td class="{% if item.state == 'running' %}running{% else %}stopped{% endif %}">{{ item.state }}</td>
         <td>{{ item.private_ip }}</td>
         <td>{{ item.public_ip }}</td>
         <td> <input type="button" onclick="ec2_action('{{ item.instance_id }}', '{{item.state}}')" value="{% if item.state == 'stopped' %} Start {% else %} Stop {% endif %}"> </td>
     </tr>
     {% endfor %}
 </table>
+
+<h2>Not Running</h2>
+<table border=1>
+    <tr>
+        <th>インスタンス名</th>
+        <th>ステータス</th>
+        <th>Private IP</th>
+        <th>Public IP</th>
+        <th>起動/停止</th>
+    </tr>
+    {% for item in not_running_list %}
+    <tr>
+        <td>{{ item.name }}</td>
+        <td class="{% if item.state == 'running' %}running{% else %}stopped{% endif %}">{{ item.state }}</td>
+        <td>{{ item.private_ip }}</td>
+        <td>{{ item.public_ip }}</td>
+        <td> <input type="button" onclick="ec2_action('{{ item.instance_id }}', '{{item.state}}')" value="{% if item.state == 'stopped' %} Start {% else %} Stop {% endif %}"> </td>
+    </tr>
+    {% endfor %}
+</table>
+
 
 
 

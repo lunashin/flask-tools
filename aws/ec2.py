@@ -20,10 +20,33 @@ class ec2:
     # インスタンスリストを取得
     # return: ec2_record[]
     # 
-    def get_all(self):
+    def get_all(self) -> list:
         self.records = ec2_records()
         self.records.make_from_resource(self.resource)
         return self.records.records
+
+    # 稼働中インスタンスリスト
+    def get_running(self) -> list:
+        all_ins = self.get_all()
+
+        # 稼働中のみ抽出
+        ret = []
+        for item in all_ins:
+            if item.isRunning():
+                ret.append(item)
+        return ret
+
+    # 稼働中以外のインスタンスリスト
+    def get_not_running(self) -> list:
+        all_ins = self.get_all()
+
+        # 稼働中のみ抽出
+        ret = []
+        for item in all_ins:
+            if not item.isRunning():
+                ret.append(item)
+        return ret
+
 
     # インスタンス作成
     def create_instance(self, name, instance_type, image_id, security_group_id):
@@ -157,6 +180,11 @@ class ec2_record:
     # 有効なデータかどうか
     def isValid(self):
         return self.state != 'terminated'
+
+    def isRunning(self) -> bool:
+        return self.state == 'running'
+    def isStopped(self) -> bool:
+        return self.state == 'stopped'
 
     # メンバ表示
     def show(self):

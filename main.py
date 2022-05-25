@@ -417,8 +417,9 @@ def ep_upload():
 @app.route("/aws", methods=["GET"])
 def ep_aws():
     ec2_obj = ec2.ec2()
-    res = ec2_obj.get_all()
-    return render_template('ec2_list.html', ec2_list=res)
+    res_running = ec2_obj.get_running()
+    res_not_running = ec2_obj.get_not_running()
+    return render_template('ec2_list.html', running_list=res_running, not_running_list=res_not_running)
 
 
 # AWS START TEST
