@@ -58,16 +58,22 @@
 
 
 <script>
+
+    // １分毎にリフレッシュ
+    setTimeout("location.href=location.href",60*1000);
+
     // Send EC2 Start
     function ec2_start(instance_id)
     {
-        // fetch("/aws/start?instance_id=" + instance_id);
+        fetch("/aws/start?instance_id=" + instance_id);
+        setTimeout("location.href=location.href",500);
     }
 
     // Send EC2 Stop
     function ec2_stop(instance_id)
     {
-        // fetch("/aws/stop?instance_id=" + instance_id);
+        fetch("/aws/stop?instance_id=" + instance_id);
+        setTimeout("location.href=location.href",500);
     }
 
     // EC2 Start/Stop Action
