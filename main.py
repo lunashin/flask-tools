@@ -422,7 +422,23 @@ def ep_aws():
     return render_template('ec2_list.html', running_list=res_running, not_running_list=res_not_running)
 
 
-# AWS START TEST
+# AWS Create (いつもの)
+#
+@app.route("/aws/create_template", methods=["GET"])
+def ep_aws_create_template():
+    ec2_obj = ec2.ec2()
+    
+    dt_now = datetime.datetime.now()
+    dt_str = dt_now.strftime('%Y-%m-%d_%H%M%S')
+    name = dt_str
+    instance_type = 't2.micro'
+    image_id = 'ami-00bc9b7f0e98dc134'
+    security_group_id = 'sg-0633e97c90e23f751'
+
+    ec2_obj.create_instance(name, instance_type, image_id, security_group_id)
+    return "ok"
+
+# AWS START
 #
 @app.route("/aws/start", methods=["GET"])
 def ep_aws_start():
@@ -431,13 +447,22 @@ def ep_aws_start():
         ec2_obj.start(request.args.get('instance_id'))
     return "ok"
 
-# AWS STOP TEST
+# AWS STOP
 #
 @app.route("/aws/stop", methods=["GET"])
 def ep_aws_stop():
     if request.args.get('instance_id') is not None:
         ec2_obj = ec2.ec2_low()
         ec2_obj.stop(request.args.get('instance_id'))
+    return "ok"
+
+# AWS Terminate
+#
+@app.route("/aws/terminate", methods=["GET"])
+def ep_aws_terminate():
+    if request.args.get('instance_id') is not None:
+        ec2_obj = ec2.ec2_low()
+        ec2_obj.terminate(request.args.get('instance_id'))
     return "ok"
 
 

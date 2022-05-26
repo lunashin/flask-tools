@@ -28,7 +28,7 @@
         <td class="{% if item.state == 'running' %}running{% else %}stopped{% endif %}">{{ item.state }}</td>
         <td>{{ item.private_ip }}</td>
         <td>{{ item.public_ip }}</td>
-        <td> <input type="button" onclick="ec2_action('{{ item.instance_id }}', '{{item.state}}')" value="{% if item.state == 'stopped' %} Start {% else %} Stop {% endif %}"> </td>
+        <td> <input type="button" onclick="ec2_stop('{{ item.name }}', '{{ item.instance_id }}')" value="Stop"> </td>
     </tr>
     {% endfor %}
 </table>
@@ -48,11 +48,14 @@
         <td class="{% if item.state == 'running' %}running{% else %}stopped{% endif %}">{{ item.state }}</td>
         <td>{{ item.private_ip }}</td>
         <td>{{ item.public_ip }}</td>
-        <td> <input type="button" onclick="ec2_action('{{ item.instance_id }}', '{{item.state}}')" value="{% if item.state == 'stopped' %} Start {% else %} Stop {% endif %}"> </td>
+        <td> <input type="button" onclick="ec2_start('{{ item.instance_id }}')" value="Start">
+        <input type="button" onclick="ec2_terminate('{{ item.name }}', '{{ item.instance_id }}')" value="Terminate"> </td>
     </tr>
     {% endfor %}
 </table>
 
+<br>
+<input type="button" onclick="ec2_create_template()" value="Create(いつもの)">
 
 
 
@@ -63,6 +66,17 @@
     setTimeout("location.href=location.href",60*1000);
 
     // Send EC2 Start
+    function ec2_create_template()
+    {
+        let yesno = window.confirm('いつもの設定でインスタンスを作成しますか？');
+
+        if (yesno) {
+            fetch("/aws/create_template");
+            setTimeout("location.href=location.href",500);
+        }
+    }
+
+    // Send EC2 Start
     function ec2_start(instance_id)
     {
         fetch("/aws/start?instance_id=" + instance_id);
@@ -70,14 +84,29 @@
     }
 
     // Send EC2 Stop
-    function ec2_stop(instance_id)
+    function ec2_stop(name, instance_id)
     {
-        fetch("/aws/stop?instance_id=" + instance_id);
-        setTimeout("location.href=location.href",500);
+        let yesno = window.confirm(name + ' / ' + instance_id + 'を停止してもよろしいですか？');
+
+        if (yesno) {
+            fetch("/aws/stop?instance_id=" + instance_id);
+            setTimeout("location.href=location.href",500);
+        }
+    }
+
+    // Send EC2 Terminate
+    function ec2_terminate(name, instance_id)
+    {
+        let yesno = window.confirm(name + ' / ' + instance_id + 'を削除してもよろしいですか？\nこの操作は戻せません。');
+
+        if (yesno) {
+            fetch("/aws/terminate?instance_id=" + instance_id);
+            setTimeout("location.href=location.href",500);
+        }
     }
 
     // EC2 Start/Stop Action
-    function ec2_action(instance_id, state){
+    function ec2_action(name, instance_id, state){
         if (state == 'stopped')
         {
             // start
@@ -86,7 +115,7 @@
         else
         {
             // stop
-            ec2_stop(instance_id);
+            ec2_stop(name, instance_id);
         }
 
         // ボタン非表示

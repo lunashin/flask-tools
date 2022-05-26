@@ -57,7 +57,7 @@ class ec2:
         pass
 
     # インスタンス作成（デフォルト設定）
-    def create_instance(self):
+    def create_instance_preset(self):
         name = 'test'
         instance_type = 't2.micro'
         image_id = 'ami-00bc9b7f0e98dc134'
