@@ -18,6 +18,7 @@
     <tr>
         <th>インスタンス名</th>
         <th>ステータス</th>
+        <th>タイプ</th>
         <th>Private IP</th>
         <th>Public IP</th>
         <th>起動/停止</th>
@@ -26,6 +27,7 @@
     <tr>
         <td>{{ item.name }}</td>
         <td class="{% if item.state == 'running' %}running{% else %}stopped{% endif %}">{{ item.state }}</td>
+        <td>{{ item.instance_type}}</td>
         <td>{{ item.private_ip }}</td>
         <td>{{ item.public_ip }}</td>
         <td> <input type="button" onclick="ec2_stop('{{ item.name }}', '{{ item.instance_id }}')" value="Stop"> </td>
@@ -38,6 +40,7 @@
     <tr>
         <th>インスタンス名</th>
         <th>ステータス</th>
+        <th>タイプ</th>
         <th>Private IP</th>
         <th>Public IP</th>
         <th>起動/停止</th>
@@ -46,6 +49,7 @@
     <tr>
         <td>{{ item.name }}</td>
         <td class="{% if item.state == 'running' %}running{% else %}stopped{% endif %}">{{ item.state }}</td>
+        <td>{{ item.instance_type}}</td>
         <td>{{ item.private_ip }}</td>
         <td>{{ item.public_ip }}</td>
         <td> <input type="button" onclick="ec2_start('{{ item.instance_id }}')" value="Start">

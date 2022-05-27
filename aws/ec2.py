@@ -2,6 +2,10 @@
 
 import boto3
 import sys
+import datetime
+
+
+
 
 
 ###########################################
@@ -50,18 +54,17 @@ class ec2:
 
     # インスタンス作成
     def create_instance(self, name, instance_type, image_id, security_group_id):
-        tags = {}
-        tags['Name'] = 'test'
-        ins_list = self.resource.create_instances(ImageId=image_id, InstanceType=instance_type, SecurityGroupIds=[security_group_id], MaxCount=1, MinCount=1)
-        print(ins_list)
-        pass
+        tag = {'Key': 'Name', 'Value': name}
+        tags = {'ResourceType': "instance", 'Tags': [tag]}
+        ins_list = self.resource.create_instances(ImageId=image_id, InstanceType=instance_type, SecurityGroupIds=[security_group_id], TagSpecifications=[tags], MaxCount=1, MinCount=1)
 
     # インスタンス作成（デフォルト設定）
-    def create_instance_preset(self):
-        name = 'test'
-        instance_type = 't2.micro'
+    def create_instance_preset(self, name):
+        dt_now = datetime.datetime.now()
+        name = name + " " + dt_now.strftime('%Y%m%d-%H%M%S') + " Created by Flask"
+        instance_type = 't2.small'
         image_id = 'ami-00bc9b7f0e98dc134'
-        security_group_id = 'sg-0633e97c90e23f751'
+        security_group_id = 'sg-b5bc00d2'
         self.create_instance(name, instance_type, image_id, security_group_id)
 
 
@@ -131,6 +134,7 @@ class ec2_record:
     public_ip = ""
     private_ip = ""
     state = ""
+    instance_type = ""
     image_id = ""
     security_groups = None
 
@@ -139,6 +143,8 @@ class ec2_record:
 
     # リソースをパース
     def make_from_resource(self, instance):
+        # EC2.Instance オブジェクト
+        # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ec2.html#instance
         self.state = instance.state.get('Name')
 
         # 削除済みの場合は終わり
@@ -154,6 +160,7 @@ class ec2_record:
         self.instance_id = instance.instance_id
         self.public_ip = instance.public_ip_address
         self.private_ip = instance.private_ip_address
+        self.instance_type = instance.instance_type
         self.image_id = instance.image_id
         self.security_groups = instance.security_groups
 
