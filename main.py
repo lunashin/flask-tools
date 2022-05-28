@@ -116,6 +116,27 @@ def base64decode(str):
 
 
 
+# JSON整形
+@app.route("/json_format", methods=["POST"])
+@content_type('application/json')
+def ep_json_format():
+    req_data = request.json['data']
+    # print(req_data)
+
+    # JSON Format
+    try:
+        j_decode = json.loads(req_data)
+        j_indent = json.dumps(j_decode, indent=2)
+    except Exception as e:
+        j_indent = ""
+
+    # make response
+    j = json.loads('{"result":""}')
+    j["result"] = j_indent
+
+    # response
+    return j
+
 
 
 
@@ -465,6 +486,18 @@ def ep_aws_terminate():
         ec2_obj.terminate(request.args.get('instance_id'))
     return "ok"
 
+# AWS Change instance type
+#
+@app.route("/aws/change_instance_type", methods=["GET"])
+def ep_aws_chg_instance_type():
+    instance_id = request.args.get('instance_id')
+    instance_type = request.args.get('instance_type')
+
+    if instance_id is not None and instance_type is not None:
+        ec2_obj = ec2.ec2()
+        res = ec2_obj.change_instance_type(instance_id, instance_type)
+
+    return "ok"
 
 
 

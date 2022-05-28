@@ -33,6 +33,22 @@ function init()
           });
     });
 
+    // Base64デコード
+    elem = document.getElementById("json_format_from");
+    elem.addEventListener('change', (event) => {
+        // alert(event.target.value);
+
+        // POST
+        postData("/json_format",  { data: event.target.value })
+        .then(data => {
+            elem = document.getElementById("json_format_result");
+            elem.value = data.result;
+
+            elem = document.getElementById("json_format_json");
+            elem.value = data.json_formated;
+          });
+    });
+
 }
 
 

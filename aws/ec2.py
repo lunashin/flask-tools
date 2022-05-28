@@ -67,6 +67,11 @@ class ec2:
         security_group_id = 'sg-b5bc00d2'
         self.create_instance(name, instance_type, image_id, security_group_id)
 
+    # インスタンスタイプ変更
+    def change_instance_type(self, instance_id, instance_type):
+        instance = ec2.Instance(instance_id)
+        res = instance.modify_attribute(InstanceType={'Value': instance_type})
+
 
 # EC2 (low api ver)
 class ec2_low:

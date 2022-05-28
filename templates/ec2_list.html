@@ -5,6 +5,7 @@
     <style type="text/css">
         .running{ color: #40bd19; font-weight:bolder; }
         .stopped{ color: #bebebe; }
+        .btn-terminate{ background: #e96b6b;}
     </style>
 
 </head>
@@ -53,7 +54,7 @@
         <td>{{ item.private_ip }}</td>
         <td>{{ item.public_ip }}</td>
         <td> <input type="button" onclick="ec2_start('{{ item.instance_id }}')" value="Start">
-        <input type="button" onclick="ec2_terminate('{{ item.name }}', '{{ item.instance_id }}')" value="Terminate"> </td>
+        <input type="button" class="btn-terminate" onclick="ec2_terminate('{{ item.name }}', '{{ item.instance_id }}')" value="Terminate"> </td>
     </tr>
     {% endfor %}
 </table>
@@ -101,7 +102,7 @@
     // Send EC2 Terminate
     function ec2_terminate(name, instance_id)
     {
-        let yesno = window.confirm(name + ' / ' + instance_id + 'を削除してもよろしいですか？\nこの操作は戻せません。');
+        let yesno = window.confirm(name + ' / ' + instance_id + 'を削除してもよろしいですか？\n\n注意: この操作は戻せません。');
 
         if (yesno) {
             fetch("/aws/terminate?instance_id=" + instance_id);

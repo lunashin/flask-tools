@@ -22,6 +22,7 @@ source ./bin/activate
 echo "Set Env"
 # export FLASK_APP=$SCRIPT_DIR/main.py
 export FLASK_APP=./main.py
+export FLASK_ENV=development
 
 echo "run flask ( $host:$port )"
 flask run --host $host --port $port

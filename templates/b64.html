@@ -16,6 +16,8 @@
         new ClipboardJS('.btn');
     </script>
 
+    <h2>Base64 Tool</h2>
+
     <!-- Base64 Decode -->
     <label for="base64decode_from">base64 Decode text:</label><br>
     <textarea id="base64decode_from" name="base64decode_from" placeholder="Input plain text" rows="25" cols="50"></textarea>
@@ -31,6 +33,19 @@
     <textarea id="base64encode_from" name="base64encode_from" placeholder="Input plain text" rows="25" cols="50"></textarea>
     <textarea id="base64encode_result" placeholder="result" rows="25" cols="50"></textarea>
     <button class="btn" data-clipboard-target="#base64encode_result">Copy</button><br>
+
+    <br>
+    <br>
+
+    <h2>JSON Tool</h2>
+
+    <!-- JSON Format -->
+    <label for="json_format_from">JSON Format:</label><br>
+    <textarea id="json_format_from" name="json_format_from" placeholder="Input plain text" rows="25" cols="50"></textarea>
+    <textarea id="json_format_result" placeholder="result" rows="25" cols="50"></textarea>
+    <button class="btn" data-clipboard-target="#json_format_result">Copy</button><br>
+
+
 
     <script src="/static/b64.js"></script>
 </body>
