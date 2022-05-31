@@ -43,8 +43,8 @@ holiday_list = [
 
 # レコード管理
 class schedule_manager:
-    list = []
-    role_list = []
+    list = []           # schedule_record[]
+    role_list = []      # str[]
     index_name = -1
     index_days = -1
     index_role = -1
@@ -162,7 +162,7 @@ class schedule_manager:
         with open(outfile, mode='w') as f:
             self.write_to_stream(f, delimiter)
 
-    # ストリームへ出力
+    # CSVをストリームへ出力
     def write_to_stream(self, st, delimiter):
         # ヘッダ
         st.write("No" + delimiter + "Name"  + delimiter + "days" + delimiter + "role" + delimiter + "date" + "\n")
@@ -186,6 +186,21 @@ class schedule_manager:
             st.write("\n")
             number = number + 1
 
+    # CSV内容を取得
+    def get_schedule_text(self):
+        f = io.StringIO()
+        self.write_schedule_to_stream(f)
+        ret = f.getvalue()
+        f.close()
+        return ret
+
+    # スケジュールのみをストリームへ出力
+    def write_schedule_to_stream(self, st):
+        # 本体
+        for item in self.list:
+            # 開始日 → 終了日
+            st.write(item.start_date.strftime('%Y/%m/%d') + " → " + item.end_date.strftime('%Y/%m/%d'))
+            st.write("\n")
 
 
 

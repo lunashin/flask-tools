@@ -172,6 +172,7 @@ def make_schedule_from_string(csv_text, index_name, index_days, index_role, star
 
 
 # CSVテキストからスケジュールを作成(ストリーム版)
+# return: 結果リスト ( [0]:CSV  / [1]:スケジュールのみ )
 def make_schedule_from_stream(f, index_name, index_days, index_role, start_date_str):
     mng = schedule_manager.schedule_manager()
 
@@ -188,11 +189,21 @@ def make_schedule_from_stream(f, index_name, index_days, index_role, start_date_
     start_date = datetime.datetime.strptime(start_date_str, '%Y%m%d')
     mng.detect_start_end(start_date)
 
+    # CSV作成
     result = mng.get_csv_text(app.config['CSV_DELIMITER'])
     print("resut--------------")
     print(result)
 
-    return result
+    # スケジュールのみ作成
+    schedule_text = mng.get_schedule_text()
+    print(schedule_text)
+
+    # リストで返却
+    ret = []
+    ret.append(result)
+    ret.append(schedule_text)
+
+    return ret
 
 
 # CSVファイルから先頭行のフィールドをリストで取得
@@ -281,12 +292,14 @@ def ep_csv_upload():
     form_key = "files"
 
     # ファイル名等チェック・保存
-    file_dest = check_and_store_file(request, form_key)
-    if file_dest == '':
+    file_dest_list = check_and_store_file(request, form_key)
+    if len(file_dest_list) <= 0:
         print("redirect")
         return redirect("/static/csv-upload.html")
 
-    app.config['CSV_FILE'] = file_dest
+    # 最初に見つかったファイルをターゲットとする
+    app.config['CSV_FILE'] = file_dest_list[0]
+    file_dest = file_dest_list[0]
 
     # デリミタ決定
     with open(file_dest) as f:
@@ -343,9 +356,9 @@ def ep_csv_set_param():
     index_role = int(index_role_str)
 
     # スケジュールCSV作成
-    ret_csv = make_schedule_from_file(app.config['CSV_FILE'], index_name, index_days, index_role, start_date_str)
+    ret_list = make_schedule_from_file(app.config['CSV_FILE'], index_name, index_days, index_role, start_date_str)
 
-    return render_template('csv_result.html', csv_text=ret_csv)
+    return render_template('csv_result.html', csv_text=ret_list[0], schedule_text=ret_list[1])
 
 
 
@@ -377,7 +390,7 @@ def allwed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # ファイル名等チェック・保存
-# 
+# return : ファイルパスリスト
 def check_and_store_file(request, form_key):
     # ファイルがなかった場合の処理
     if form_key not in request.files:
@@ -385,27 +398,31 @@ def check_and_store_file(request, form_key):
         return ''
 
     # データの取り出し
-    file = request.files[form_key]
-    print("filename: ", file)
+    req_file_list = request.files.getlist(form_key)
+
+    # file = request.files[form_key]
+    # print("filename: ", file)
 
     # ファイル名がなかった時の処理
-    if file.filename == '':
+    if len(req_file_list) <= 0:
         print('ファイルがありません2')
         return ''
 
     # ファイルのチェック
-    if file and allwed_file(file.filename):
-        # 危険な文字を削除（サニタイズ処理）
-        filename = secure_filename(file.filename)
-        # ファイルの保存
-        dest = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(dest)
-        print("保存先: ", dest)
-        return dest
-    else:
-        print('許可されていないファイル')
+    file_list = []
+    for file in req_file_list:
+        if file and allwed_file(file.filename):
+            # 危険な文字を削除（サニタイズ処理）
+            filename = secure_filename(file.filename)
+            # ファイルの保存
+            dest = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(dest)
+            print("保存先: ", dest)
+            file_list.append(dest)
+        else:
+            print('許可されていないファイル')
 
-    return ''
+    return file_list
 
 
 
