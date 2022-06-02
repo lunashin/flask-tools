@@ -12,6 +12,7 @@ import schedule_manager
 import datetime
 import os
 from aws import ec2
+from timerecord import timerecord
 
 
 app = Flask(__name__)
@@ -375,7 +376,7 @@ def ep_csv_set_param():
 # 画像のアップロード先のディレクトリ
 UPLOAD_FOLDER = './uploads'
 # アップロードされる拡張子の制限
-ALLOWED_EXTENSIONS = set(['png', 'jpg', 'gif', 'csv'])
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'gif', 'csv', 'xlsx'])
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -442,6 +443,48 @@ def ep_upload():
 
     redirect(redirect_url)
     return ''
+
+
+
+
+
+
+
+
+
+
+##################################################
+# 工数算出
+##################################################
+
+# Upload Files
+#
+@app.route("/worktime_upload", methods=["POST"])
+def ep_worktime_upload():
+    form_key = "files"
+
+    # ファイル名等チェック・保存
+    file_path_list = check_and_store_file(request, form_key)
+    if len(file_path_list) <= 0:
+        print("Error: failed check_and_store_file()")
+        return redirect("/static/worktime.html")
+
+    # 環境変数からシート名取得
+    sheet_name = os.environ.get('WORKTIME_SHEET_NAME')
+
+    tm = timerecord.TimeRecords(sheet_name)
+    tm.parse(file_path_list)
+    csv_text = tm.get_csv('\t')
+    time_text = tm.get_csv('\t', only_worktime=True)
+    print(time_text)
+
+    return render_template('worktime_result.html', csv_text=csv_text, time_text=time_text)
+
+
+
+
+
+
 
 
 

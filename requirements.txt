@@ -10,3 +10,6 @@
 Flask
 # boto3
 boto3[crt]
+
+# for timerecord
+openpyxl
