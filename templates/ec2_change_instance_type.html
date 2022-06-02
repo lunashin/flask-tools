@@ -1,0 +1,61 @@
+<html>
+
+<head>
+</head>
+
+<body>
+
+<h1>Change Instance Type</h1>
+<br>
+インスタンス名: {{ instance_info.name }}
+<br>
+インスタンスID: {{ instance_info.instance_id }}
+<br>
+インスタンス種類: {{ instance_info.instance_type }}
+<br>
+<br>
+
+<label for="instance_type">新しいインスタンス種類を選択してください:</label><br>
+<select name="instance_type" id="instance_type">
+    <option value="">-- 選択してください --</option>
+    <option value="t2.micro">t2.micro</option>
+    <option value="t2.small">t2.small</option>
+    <option value="t3a.micro">t3a.micro</option>
+    <option value="t3a.small">t3a.small</option>
+    <option value="m4.large">m4.large</option>
+</select>
+
+<br>
+<br>
+<input type="button" onclick="change_instance_type()" value="インスタンス種類を変更">
+
+
+
+
+<script>
+
+    // インスタンス種類変更
+    function change_instance_type()
+    {
+        let val = document.getElementById("instance_type").value;
+        if (val == '')
+        {
+            alert('インスタンス種類を選択してください。');
+            return;
+        }
+
+        let yesno = window.confirm('インスタンス種類を変更します。よろしいですか？\n変更後のインスタンス種類: ' + val);
+        
+        if (yesno) {
+            fetch("/aws/api/change_instance_type?instance_id={{ instance_info.instance_id }}&instance_type=" + val);
+            setTimeout("location.href=\"/aws\"",500);
+        }
+    }
+
+</script>
+
+
+
+</body>
+
+</html>

@@ -456,24 +456,43 @@ def ep_upload():
 def ep_aws():
     ec2_obj = ec2.ec2()
     res_running = ec2_obj.get_running()
-    res_not_running = ec2_obj.get_not_running()
-    return render_template('ec2_list.html', running_list=res_running, not_running_list=res_not_running)
+    res_stopped = ec2_obj.get_stopped()
+    res_other = ec2_obj.get_not_running_or_stopped()
+    dt_now = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
+    return render_template('ec2_list.html', date_str_now=dt_now, running_list=res_running, stopped_list=res_stopped, other_list=res_other)
+
+# インスタンス種類変更ページ
+# 
+@app.route("/aws/change_instance_type", methods=["GET"])
+def ep_aws_change_instance_type():
+    if request.args.get('instance_id') is not None:
+        instance_id = request.args.get('instance_id')
+    
+    ec2_obj = ec2.ec2()
+    info = ec2_obj.get_info(instance_id)
+    
+    return render_template('ec2_change_instance_type.html', instance_info=info)
 
 
 # AWS Create (いつもの)
 #
 @app.route("/aws/create_template", methods=["GET"])
 def ep_aws_create_template():
+    if request.args.get('name') is not None:
+        name = request.args.get('name')
+    
     ec2_obj = ec2.ec2()
     
     dt_now = datetime.datetime.now()
     dt_str = dt_now.strftime('%Y-%m-%d_%H%M%S')
-    name = dt_str
-    instance_type = 't2.micro'
-    image_id = 'ami-00bc9b7f0e98dc134'
-    security_group_id = 'sg-0633e97c90e23f751'
+    name = name + " " + dt_str + " Created by Flask"
+    instance_type = 't2.small'
+    # image_id = 'ami-00bc9b7f0e98dc134'
+    image_id = 'ami-06a46da680048c8ae'
+    security_group_id = 'sg-b5bc00d2'
+    keypair_name = 'common-key-pair'
 
-    ec2_obj.create_instance(name, instance_type, image_id, security_group_id)
+    ec2_obj.create_instance(name, instance_type, image_id, security_group_id, keypair_name)
     return "ok"
 
 # AWS START
@@ -505,7 +524,7 @@ def ep_aws_terminate():
 
 # AWS Change instance type
 #
-@app.route("/aws/change_instance_type", methods=["GET"])
+@app.route("/aws/api/change_instance_type", methods=["GET"])
 def ep_aws_chg_instance_type():
     instance_id = request.args.get('instance_id')
     instance_type = request.args.get('instance_type')

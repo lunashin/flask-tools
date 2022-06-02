@@ -40,23 +40,40 @@ class ec2:
                 ret.append(item)
         return ret
 
-    # 稼働中以外のインスタンスリスト
-    def get_not_running(self) -> list:
+    # 停止中インスタンスリスト
+    def get_stopped(self) -> list:
+        all_ins = self.get_all()
+
+        # 停止中のみ抽出
+        ret = []
+        for item in all_ins:
+            if item.isStopped():
+                ret.append(item)
+        return ret
+
+    # 稼働中/停止中以外のインスタンスリスト
+    def get_not_running_or_stopped(self) -> list:
         all_ins = self.get_all()
 
         # 稼働中のみ抽出
         ret = []
         for item in all_ins:
-            if not item.isRunning():
+            if not item.isRunning() and not item.isStopped():
                 ret.append(item)
         return ret
 
+    # インスタンス情報取得
+    def get_info(self, instance_id:str):
+        instance = self.resource.Instance(instance_id)
+        record = ec2_record()
+        record.make_from_resource(instance)
+        return record
 
     # インスタンス作成
-    def create_instance(self, name, instance_type, image_id, security_group_id):
+    def create_instance(self, name, instance_type, image_id, security_group_id, keypair_name):
         tag = {'Key': 'Name', 'Value': name}
         tags = {'ResourceType': "instance", 'Tags': [tag]}
-        ins_list = self.resource.create_instances(ImageId=image_id, InstanceType=instance_type, SecurityGroupIds=[security_group_id], TagSpecifications=[tags], MaxCount=1, MinCount=1)
+        ins_list = self.resource.create_instances(ImageId=image_id, InstanceType=instance_type, SecurityGroupIds=[security_group_id], TagSpecifications=[tags], KeyName=keypair_name, MaxCount=1, MinCount=1)
 
     # インスタンス作成（デフォルト設定）
     def create_instance_preset(self, name):
@@ -69,7 +86,7 @@ class ec2:
 
     # インスタンスタイプ変更
     def change_instance_type(self, instance_id, instance_type):
-        instance = ec2.Instance(instance_id)
+        instance = self.resource.Instance(instance_id)
         res = instance.modify_attribute(InstanceType={'Value': instance_type})
 
 
@@ -193,8 +210,10 @@ class ec2_record:
     def isValid(self):
         return self.state != 'terminated'
 
+    # ステータスが running かどうか
     def isRunning(self) -> bool:
         return self.state == 'running'
+    # ステータスが stopped かどうか
     def isStopped(self) -> bool:
         return self.state == 'stopped'
 
