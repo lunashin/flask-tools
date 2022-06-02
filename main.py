@@ -76,7 +76,7 @@ def ep_base64decode():
         j_decode = json.loads(decode)
         j_indent = json.dumps(j_decode, indent=2)
     except Exception as e:
-        j_indent = ""
+        j_indent = "Error: " + str(e)
 
     # make response
     j = json.loads('{"result":""}')
@@ -110,7 +110,7 @@ def base64decode(str):
             except Exception as e:
                 print("base64 decodee error.")
                 print(e)
-                return ""
+                return "Error: " + str(e)
     return decode_str.decode('utf8')
 
 
@@ -128,7 +128,8 @@ def ep_json_format():
         j_decode = json.loads(req_data)
         j_indent = json.dumps(j_decode, indent=2)
     except Exception as e:
-        j_indent = ""
+        print(e)
+        j_indent = "Error: " + str(e)
 
     # make response
     j = json.loads('{"result":""}')
