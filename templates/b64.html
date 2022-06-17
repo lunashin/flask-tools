@@ -42,11 +42,20 @@
     <!-- JSON Format -->
     <label for="json_format_from">JSON Format:</label><br>
     <textarea id="json_format_from" name="json_format_from" placeholder="Input plain text" rows="25" cols="50"></textarea>
-    <textarea id="json_format_result" placeholder="result" rows="25" cols="50"></textarea>
+    <textarea id="json_format_result" placeholder="result" rows="25" cols="100"></textarea>
     <button class="btn" data-clipboard-target="#json_format_result">Copy</button><br>
 
+    <pre id="json-display"></pre>
 
 
+
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="/static/json-editor/jquery.json-editor.min.js"></script>
+    
     <script src="/static/b64.js"></script>
 </body>
 

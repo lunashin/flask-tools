@@ -33,10 +33,15 @@ function init()
           });
     });
 
-    // Base64デコード
+    // JSON整形
     elem = document.getElementById("json_format_from");
     elem.addEventListener('change', (event) => {
         // alert(event.target.value);
+
+        json = JSON.parse(event.target.value);
+        var editor = new JsonEditor('#json-display', json);
+        // editor.load();
+
 
         // POST
         postData("/json_format",  { data: event.target.value })
