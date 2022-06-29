@@ -36,24 +36,18 @@ function init()
     // JSON整形
     elem = document.getElementById("json_format_from");
     elem.addEventListener('change', (event) => {
-        // alert(event.target.value);
-
-        json = JSON.parse(event.target.value);
-        var editor = new JsonEditor('#json-display', json);
-        // editor.load();
-
-
         // POST
         postData("/json_format",  { data: event.target.value })
         .then(data => {
             elem = document.getElementById("json_format_result");
             elem.value = data.result;
-
-            elem = document.getElementById("json_format_json");
-            elem.value = data.json_formated;
           });
-    });
 
+        // JsonEditor へ反映
+        var editor = new JsonEditor('#json-display', JSON.parse('{}'));
+        json = JSON.parse(event.target.value);
+        editor.load(json);
+    });
 }
 
 
